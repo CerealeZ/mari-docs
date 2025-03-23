@@ -6,7 +6,9 @@ import {
   Text,
   Show,
   Alert,
+  Stack,
 } from "@chakra-ui/react";
+import Image from "next/image";
 import { useState } from "react";
 
 export const Start = ({
@@ -17,35 +19,34 @@ export const Start = ({
   const [error, setError] = useState<null | Error>(null);
 
   return (
-    <Center height={"dvh"}>
-      <Box maxW={"10/12"} w={"full"}>
-        <Heading>Mari Docs</Heading>
-        <Text>Upload your bruno collection!</Text>
-
-        <Show when={error}>
-          {() => {
-            return (
-              <Alert.Root status="error">
-                <Alert.Indicator />
-                <Alert.Content>
-                  <Alert.Title>Oops</Alert.Title>
-                  <Alert.Description>
-                    Your collection might be invalid
-                  </Alert.Description>
-                </Alert.Content>
-              </Alert.Root>
-            );
-          }}
-        </Show>
+    <Center h={"dvh"} px={"2"}>
+      <Stack maxW={"65ch"} w={"full"}>
+        <Heading textStyle={"6xl"}>Mari Docs</Heading>
+        <Text>Watch your Bruno collection in a nice way</Text>
+        <Box minH={"20"}>
+          <Show when={error}>
+            {() => {
+              return (
+                <Alert.Root status="error">
+                  <Alert.Indicator />
+                  <Alert.Content>
+                    <Alert.Title>Oops</Alert.Title>
+                    <Alert.Description>
+                      Your collection might be invalid
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert.Root>
+              );
+            }}
+          </Show>
+        </Box>
 
         <FileUpload.Root
-          maxW="xl"
           alignItems="stretch"
           maxFiles={10}
           accept={["application/json"]}
           onFileAccept={async ({ files }) => {
             try {
-              console.log(files);
               const file = files.at(-1);
               if (!file) throw new Error("No file selected");
               const json = await file.text();
@@ -62,17 +63,14 @@ export const Start = ({
         >
           <FileUpload.HiddenInput />
           <FileUpload.Dropzone>
-            {/* <Icon size="md" color="fg.muted">
-            <LuUpload />
-          </Icon> */}
             <FileUpload.DropzoneContent>
-              <Box>Drag and drop files here</Box>
-              <Box color="fg.muted">.png, .jpg up to 5MB</Box>
+              <Image src="/bruno-logo.png" alt="" width={"70"} height={"70"} />
+              <Box>Drop your collection here!</Box>
+              <Box color="fg.muted">Only JSON files are supported</Box>
             </FileUpload.DropzoneContent>
           </FileUpload.Dropzone>
-          {/* <FileUpload.List /> */}
         </FileUpload.Root>
-      </Box>
+      </Stack>
     </Center>
   );
 };
