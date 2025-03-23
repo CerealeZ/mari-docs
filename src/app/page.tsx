@@ -1,95 +1,361 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import {
+  Clipboard,
+  Code,
+  DataList,
+  EmptyState,
+  For,
+  IconButton,
+  Show,
+  VStack,
+} from "@chakra-ui/react";
+import { Badge, Grid, GridItem, Heading, Span, Text } from "@chakra-ui/react";
+import {
+  AccordionItem,
+  AccordionItemContent,
+  AccordionItemTrigger,
+  AccordionRoot,
+} from "@/components/ui/accordion";
+import { Prose } from "@/components/ui/prose";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+import { List } from "@chakra-ui/react";
+import { useState } from "react";
+import { ImInfo } from "react-icons/im";
+import { parseBruno, Start } from "@/app/_components/start";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [bruno, setBruno] = useState<ReturnType<typeof parseBruno> | null>(
+    null
+  );
+  const [categoryPath, setCategoryPath] = useState("/");
+  const splitedPath = categoryPath.split("/");
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const sound = new Audio("/doin.mp3");
+
+  if (!bruno) return <Start onLoad={setBruno} />;
+
+  const { folders, requests, root } = bruno;
+
+  const mappedRequests = mapValues(requests);
+  const mappedFolders = mapValues(folders);
+  const path = splitedPath.slice(0, -1).join("/") || "/";
+  const selectedFolders = mappedFolders.get(path);
+  const selectedFolder = selectedFolders?.find(
+    ({ value }) => value.name === splitedPath.at(-1)
+  );
+
+  return (
+    <Grid gridTemplateColumns={"24rem 1fr"}>
+      <GridItem colSpan={2}>
+        <Heading textStyle={"5xl"}>Mari Docs</Heading>
+        <Text>Documentación de bruno</Text>
+      </GridItem>
+
+      <GridItem>
+        <List.Root>
+          <List.Item
+            cursor={"pointer"}
+            onClick={() => {
+              setCategoryPath("/");
+              sound.play();
+            }}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Home
+          </List.Item>
+          {folders.map(({ value, path }, index) => {
+            const newPath =
+              path === "/" ? "/" + value.name : path + "/" + value.name;
+
+            return (
+              <List.Item
+                cursor={"pointer"}
+                key={index}
+                onClick={() => setCategoryPath(newPath)}
+              >
+                {value.name}
+              </List.Item>
+            );
+          })}
+        </List.Root>
+      </GridItem>
+      <GridItem px={4}>
+        {categoryPath === "/" ? (
+          <>
+            <Heading textStyle={"4xl"}>{root.name}</Heading>
+            <Prose>
+              <Markdown remarkPlugins={[remarkGfm]}>{root.root?.docs}</Markdown>
+            </Prose>
+          </>
+        ) : (
+          <>
+            <Heading textStyle={"4xl"}> {selectedFolder?.value.name}</Heading>
+
+            <Show when={selectedFolder?.value.root?.docs}>
+              {(docs) => {
+                return (
+                  <Prose>
+                    <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>{" "}
+                  </Prose>
+                );
+              }}
+            </Show>
+          </>
+        )}
+
+        <Categories
+          data={
+            mappedRequests.get(categoryPath)?.map(({ value }) => {
+              const { request, name } = value;
+
+              const body =
+                request.body.mode === "json"
+                  ? {
+                      type: "json",
+                      content: JSON.stringify(
+                        JSON.parse(request.body.json),
+                        null,
+                        2
+                      ),
+                    }
+                  : undefined;
+
+              return {
+                path: request.url,
+                method: request.method,
+                description: name,
+                docs: request.docs,
+                body: body,
+              };
+            }) ?? []
+          }
+        />
+      </GridItem>
+    </Grid>
   );
 }
+
+const Categories = ({
+  data,
+}: {
+  data: {
+    method: string;
+    path: string;
+    description: string;
+    docs: string;
+    body?: {
+      type: string;
+      content: string;
+    };
+  }[];
+}) => {
+  return (
+    <AccordionRoot>
+      <For
+        each={data}
+        fallback={
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <ImInfo />
+              </EmptyState.Indicator>
+              <VStack textAlign="center">
+                <EmptyState.Title>No requests</EmptyState.Title>
+                <EmptyState.Description>
+                  There are no requests in this category
+                </EmptyState.Description>
+              </VStack>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        }
+      >
+        {({ description, method, path, docs, body }) => {
+          return (
+            <AccordionItem key={path + method} value={path + method}>
+              <AccordionItemTrigger>
+                <Badge size={"lg"}>{method}</Badge>
+                <Span textStyle={"2xl"}>{description}</Span>
+              </AccordionItemTrigger>
+              <AccordionItemContent>
+                <DataList.Root mb={4}>
+                  <DataList.Item>
+                    <DataList.ItemLabel>URI</DataList.ItemLabel>
+                    <DataList.ItemValue alignItems={"center"} gap={2}>
+                      {path}
+                      <Clipboard.Root value={path}>
+                        <Clipboard.Trigger asChild>
+                          <IconButton variant="surface" size="xs">
+                            <Clipboard.Indicator />
+                          </IconButton>
+                        </Clipboard.Trigger>
+                      </Clipboard.Root>
+                    </DataList.ItemValue>
+                  </DataList.Item>
+                  <DataList.Item>
+                    <DataList.ItemLabel>Method:</DataList.ItemLabel>
+                    <DataList.ItemValue>{method}</DataList.ItemValue>
+                  </DataList.Item>
+
+                  <Show when={body}>
+                    {(body) => {
+                      return (
+                        <DataList.Item>
+                          <DataList.ItemLabel>Body</DataList.ItemLabel>
+                          <DataList.ItemValue>
+                            <Code whiteSpace={"pre"}>{body.content}</Code>
+                          </DataList.ItemValue>
+                        </DataList.Item>
+                      );
+                    }}
+                  </Show>
+                </DataList.Root>
+
+                <Prose>
+                  <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>
+                </Prose>
+              </AccordionItemContent>
+            </AccordionItem>
+          );
+        }}
+      </For>
+    </AccordionRoot>
+  );
+};
+
+interface BrunoRequest {
+  type: "http";
+  name: string;
+  /** The request sequence. This is to sort the requests in the bruno interface */
+  seq: number;
+  request: {
+    /** The Request String, like /my-endpoint/:id */
+    url: string;
+    /** The HTTP Method */
+    method: string;
+    /** The Request Headers */
+    headers: Header[];
+    /** The Request Params. There are 2 types: Query Params and Path Params */
+    params: Param[];
+    /** The Request Body */
+    body: JSONRequestBody | NotBody;
+    /** The javascript code to execute before a request and after a response  */
+    script: Script;
+    /** Pass and make stuff with the request and response https://docs.usebruno.com/testing/script/vars */
+    vars: Vars;
+    /** Soft tests. */
+    assertions: Assertion[];
+    /** Javascript code to execute advance tests */
+    tests: string;
+    /** The documentation of the request. This is Markdown */
+    docs: string;
+    /** The Authentication Method */
+    auth: NotAuth | BearerAuth;
+  };
+}
+
+interface BrunoFolder {
+  type: "folder";
+  name: string;
+  root?: BrunoRoot;
+  items: (BrunoFolder | BrunoRequest)[];
+}
+
+interface Param {
+  type: "query" | "path";
+  name: string;
+  value: string;
+  enabled: boolean;
+}
+
+interface Header {
+  name: string;
+  value: string;
+  enabled: boolean;
+}
+
+interface Body {
+  formUrlEncoded: unknown[];
+  multipartForm: unknown[];
+  file: unknown[];
+}
+
+interface JSONRequestBody extends Body {
+  mode: "json";
+  json: string;
+}
+
+interface NotBody extends Body {
+  mode: "none";
+}
+
+/** This is string code of a JS Script */
+type Script = Partial<Record<"res" | "req", string>>;
+
+type Vars = Partial<Record<"req" | "res", Var[]>>;
+type Var = {
+  name: string;
+  value: string;
+  enabled: boolean;
+  local: boolean;
+};
+
+/** An Assertion is a Bruno test of how a response should be */
+type Assertion = {
+  name: string;
+  /** The asssertion. This use expressions like gt value, eq value */
+  value: string;
+  enabled: boolean;
+  uid: string;
+};
+
+type NotAuth = {
+  mode: "none";
+};
+
+type BearerAuth = {
+  mode: "bearer";
+  bearer: {
+    token: string;
+  };
+};
+
+// const isBrunoRequest = (item: object): item is BrunoRequest => {
+//   return "type" in item && item.type === "http";
+// };
+
+// const isBrunoFolder = (item: object): item is BrunoFolder => {
+//   return "type" in item && item.type === "folder";
+// };
+
+export type BrunoCollection = {
+  name: string;
+  version: string;
+  environments: unknown[];
+  items: (BrunoFolder | BrunoRequest)[];
+  brunoConfig: unknown;
+  root?: BrunoRoot;
+  activeEnvironmentUid?: string;
+};
+
+type BrunoRoot = {
+  docs?: string;
+  meta?: Partial<Record<"name", string>>;
+};
+
+const mapValues = <T extends { path: string }>(collection: T[]) => {
+  const map = collection.reduce((acc, item) => {
+    const { path, ...rest } = item;
+    const hasPath = acc.has(path);
+    if (hasPath) {
+      const requests = acc.get(path);
+      requests?.push(rest);
+    } else {
+      acc.set(path, [rest]);
+    }
+
+    return acc;
+  }, new Map<string, Omit<T, "path">[]>());
+  return map;
+};

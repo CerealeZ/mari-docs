@@ -1,0 +1,248 @@
+import {
+  Center,
+  Heading,
+  FileUpload,
+  Box,
+  Text,
+  Show,
+  Alert,
+} from "@chakra-ui/react";
+import { useState } from "react";
+
+export const Start = ({
+  onLoad,
+}: {
+  onLoad: (collection: ReturnType<typeof parseBruno>) => void;
+}) => {
+  const [error, setError] = useState<null | Error>(null);
+
+  return (
+    <Center height={"dvh"}>
+      <Box maxW={"10/12"} w={"full"}>
+        <Heading>Mari Docs</Heading>
+        <Text>Upload your bruno collection!</Text>
+
+        <Show when={error}>
+          {() => {
+            return (
+              <Alert.Root status="error">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Oops</Alert.Title>
+                  <Alert.Description>
+                    Your collection might be invalid
+                  </Alert.Description>
+                </Alert.Content>
+              </Alert.Root>
+            );
+          }}
+        </Show>
+
+        <FileUpload.Root
+          maxW="xl"
+          alignItems="stretch"
+          maxFiles={10}
+          accept={["application/json"]}
+          onFileAccept={async ({ files }) => {
+            try {
+              console.log(files);
+              const file = files.at(-1);
+              if (!file) throw new Error("No file selected");
+              const json = await file.text();
+              const brunocollection = JSON.parse(json) as BrunoCollection;
+              onLoad(parseBruno(brunocollection));
+            } catch (error) {
+              setError(
+                new Error("Error loading the bruno collection", {
+                  cause: error,
+                })
+              );
+            }
+          }}
+        >
+          <FileUpload.HiddenInput />
+          <FileUpload.Dropzone>
+            {/* <Icon size="md" color="fg.muted">
+            <LuUpload />
+          </Icon> */}
+            <FileUpload.DropzoneContent>
+              <Box>Drag and drop files here</Box>
+              <Box color="fg.muted">.png, .jpg up to 5MB</Box>
+            </FileUpload.DropzoneContent>
+          </FileUpload.Dropzone>
+          {/* <FileUpload.List /> */}
+        </FileUpload.Root>
+      </Box>
+    </Center>
+  );
+};
+
+interface BrunoRequest {
+  type: "http";
+  name: string;
+  /** The request sequence. This is to sort the requests in the bruno interface */
+  seq: number;
+  request: {
+    /** The Request String, like /my-endpoint/:id */
+    url: string;
+    /** The HTTP Method */
+    method: string;
+    /** The Request Headers */
+    headers: Header[];
+    /** The Request Params. There are 2 types: Query Params and Path Params */
+    params: Param[];
+    /** The Request Body */
+    body: JSONRequestBody | NotBody;
+    /** The javascript code to execute before a request and after a response  */
+    script: Script;
+    /** Pass and make stuff with the request and response https://docs.usebruno.com/testing/script/vars */
+    vars: Vars;
+    /** Soft tests. */
+    assertions: Assertion[];
+    /** Javascript code to execute advance tests */
+    tests: string;
+    /** The documentation of the request. This is Markdown */
+    docs: string;
+    /** The Authentication Method */
+    auth: NotAuth | BearerAuth;
+  };
+}
+
+interface BrunoFolder {
+  type: "folder";
+  name: string;
+  root?: BrunoRoot;
+  items: (BrunoFolder | BrunoRequest)[];
+}
+
+interface Param {
+  type: "query" | "path";
+  name: string;
+  value: string;
+  enabled: boolean;
+}
+
+interface Header {
+  name: string;
+  value: string;
+  enabled: boolean;
+}
+
+interface Body {
+  formUrlEncoded: unknown[];
+  multipartForm: unknown[];
+  file: unknown[];
+}
+
+interface JSONRequestBody extends Body {
+  mode: "json";
+  json: string;
+}
+
+interface NotBody extends Body {
+  mode: "none";
+}
+
+/** This is string code of a JS Script */
+type Script = Partial<Record<"res" | "req", string>>;
+
+type Vars = Partial<Record<"req" | "res", Var[]>>;
+type Var = {
+  name: string;
+  value: string;
+  enabled: boolean;
+  local: boolean;
+};
+
+/** An Assertion is a Bruno test of how a response should be */
+type Assertion = {
+  name: string;
+  /** The asssertion. This use expressions like gt value, eq value */
+  value: string;
+  enabled: boolean;
+  uid: string;
+};
+
+type NotAuth = {
+  mode: "none";
+};
+
+type BearerAuth = {
+  mode: "bearer";
+  bearer: {
+    token: string;
+  };
+};
+
+// const isBrunoRequest = (item: object): item is BrunoRequest => {
+//   return "type" in item && item.type === "http";
+// };
+
+// const isBrunoFolder = (item: object): item is BrunoFolder => {
+//   return "type" in item && item.type === "folder";
+// };
+
+export type BrunoCollection = {
+  name: string;
+  version: string;
+  environments: unknown[];
+  items: (BrunoFolder | BrunoRequest)[];
+  brunoConfig: unknown;
+  root?: BrunoRoot;
+  activeEnvironmentUid?: string;
+};
+
+type BrunoRoot = {
+  docs?: string;
+  meta?: Partial<Record<"name", string>>;
+};
+
+export const parseBruno = (collection: BrunoCollection) => {
+  const root = {
+    name: collection.name,
+    version: collection.version,
+    root: collection.root,
+  };
+
+  const requests: { path: string; value: BrunoRequest }[] = [];
+  const folders: { path: string; value: Omit<BrunoFolder, "items"> }[] = [];
+
+  const navigateFolders = (folder: BrunoFolder, root = "/") => {
+    const { items, ...rest } = folder;
+    folders.push({
+      path: root,
+      value: rest,
+    });
+
+    const childrenPath =
+      root === "/" ? root + folder.name : root + "/" + folder.name;
+
+    items.forEach((item) => {
+      switch (item.type) {
+        case "http":
+          requests.push({ path: childrenPath, value: item });
+          break;
+        case "folder":
+          navigateFolders(item, childrenPath);
+          break;
+      }
+    });
+  };
+
+  collection.items.map((item) => {
+    switch (item.type) {
+      case "http":
+        requests.push({ path: "/", value: item });
+        break;
+      case "folder":
+        navigateFolders(item);
+        break;
+    }
+  });
+
+  return {
+    root,
+    requests,
+    folders,
+  };
+};
