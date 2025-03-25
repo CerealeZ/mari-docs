@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Box,
   Clipboard,
   Code,
   DataList,
@@ -8,6 +9,7 @@ import {
   For,
   IconButton,
   Show,
+  Table,
   VStack,
 } from "@chakra-ui/react";
 import { Badge, Grid, GridItem, Heading, Span, Text } from "@chakra-ui/react";
@@ -122,12 +124,39 @@ export default function Home() {
                     }
                   : undefined;
 
+              const queries = request.params.filter(
+                ({ type }) => type === "query"
+              );
+
+              const params = request.params.filter(({ type }) => {
+                return type === "path";
+              });
+
               return {
                 path: request.url,
                 method: request.method,
                 description: name,
                 docs: request.docs,
                 body: body,
+                query:
+                  queries.length > 0
+                    ? queries.map(({ name, value }) => {
+                        return {
+                          key: name,
+                          value: value,
+                        };
+                      })
+                    : undefined,
+
+                params:
+                  params.length > 0
+                    ? params.map(({ name, value }) => {
+                        return {
+                          key: name,
+                          value: value,
+                        };
+                      })
+                    : undefined,
               };
             }) ?? []
           }
@@ -149,6 +178,8 @@ const Categories = ({
       type: string;
       content: string;
     };
+    query?: { key: string; value: string }[];
+    params?: { key: string; value: string }[];
   }[];
 }) => {
   return (
@@ -171,7 +202,7 @@ const Categories = ({
           </EmptyState.Root>
         }
       >
-        {({ description, method, path, docs, body }) => {
+        {({ description, method, path, docs, body, query, params }) => {
           return (
             <AccordionItem key={path + method} value={path + method}>
               <AccordionItemTrigger>
@@ -210,8 +241,67 @@ const Categories = ({
                       );
                     }}
                   </Show>
-                </DataList.Root>
 
+                  <Show when={params}>
+                    {(params) => {
+                      return (
+                        <Box>
+                          <Heading>Params</Heading>
+                          <Table.Root size="sm" maxW={"60"}>
+                            <Table.Header>
+                              <Table.Row>
+                                <Table.ColumnHeader>Key</Table.ColumnHeader>
+                                <Table.ColumnHeader>Value</Table.ColumnHeader>
+                              </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                              <For each={params}>
+                                {({ key, value }, index) => {
+                                  return (
+                                    <Table.Row key={index}>
+                                      <Table.Cell>{key}</Table.Cell>
+                                      <Table.Cell>{value}</Table.Cell>
+                                    </Table.Row>
+                                  );
+                                }}
+                              </For>
+                            </Table.Body>
+                          </Table.Root>
+                        </Box>
+                      );
+                    }}
+                  </Show>
+
+                  <Show when={query}>
+                    {(query) => {
+                      return (
+                        <Box>
+                          <Heading>Queries</Heading>
+                          <Table.Root size="sm" maxW={"60"}>
+                            <Table.Header>
+                              <Table.Row>
+                                <Table.ColumnHeader>Key</Table.ColumnHeader>
+                                <Table.ColumnHeader>Value</Table.ColumnHeader>
+                              </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                              <For each={query}>
+                                {({ key, value }, index) => {
+                                  return (
+                                    <Table.Row key={index}>
+                                      <Table.Cell>{key}</Table.Cell>
+                                      <Table.Cell>{value}</Table.Cell>
+                                    </Table.Row>
+                                  );
+                                }}
+                              </For>
+                            </Table.Body>
+                          </Table.Root>
+                        </Box>
+                      );
+                    }}
+                  </Show>
+                </DataList.Root>
                 <Prose>
                   <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>
                 </Prose>
