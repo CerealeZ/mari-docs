@@ -30,6 +30,7 @@ import { List } from "@chakra-ui/react";
 import { useState } from "react";
 import { ImInfo } from "react-icons/im";
 import { Environment, parseBruno, Start } from "@/app/_components/start";
+import { Categories as Breadcrumbs } from "@/app/_components/categories";
 
 export default function Home() {
   const [bruno, setBruno] = useState<ReturnType<typeof parseBruno> | null>(
@@ -39,8 +40,6 @@ export default function Home() {
 
   const [categoryPath, setCategoryPath] = useState("/");
   const splitedPath = categoryPath.split("/");
-
-  const sound = new Audio("/doin.mp3");
 
   if (!bruno) return <Start onLoad={setBruno} />;
 
@@ -53,6 +52,8 @@ export default function Home() {
   const selectedFolder = selectedFolders?.find(
     ({ value }) => value.name === splitedPath.at(-1)
   );
+
+  const currentFolders = mappedFolders.get(categoryPath) ?? [];
 
   const enviroments = (
     root.environments.find(
@@ -103,33 +104,41 @@ export default function Home() {
       </GridItem>
 
       <GridItem>
+        {categoryPath === "/" ? (
+          <Heading textStyle={"xl"}>{root.name}</Heading>
+        ) : (
+          <Heading textStyle={"xl"}> {selectedFolder?.value.name}</Heading>
+        )}
+
         <List.Root>
-          <List.Item
-            cursor={"pointer"}
-            onClick={() => {
-              setCategoryPath("/");
-              sound.play();
-            }}
-          >
-            Home
-          </List.Item>
-          {folders.map(({ value, path }, index) => {
+          {currentFolders.map(({ value }, index) => {
             const newPath =
-              path === "/" ? "/" + value.name : path + "/" + value.name;
+              categoryPath === "/"
+                ? "/" + value.name
+                : categoryPath + "/" + value.name;
 
             return (
-              <List.Item
-                cursor={"pointer"}
-                key={index}
-                onClick={() => setCategoryPath(newPath)}
-              >
-                {value.name}
+              <List.Item cursor={"pointer"} key={index}>
+                <Button
+                  w={"full"}
+                  justifyContent={"start"}
+                  onClick={() => setCategoryPath(newPath)}
+                  variant={"ghost"}
+                >
+                  {value.name}
+                </Button>
               </List.Item>
             );
           })}
         </List.Root>
       </GridItem>
       <GridItem px={4}>
+        <Breadcrumbs
+          path={splitedPath.filter(Boolean)}
+          onClick={(path) => {
+            setCategoryPath(path);
+          }}
+        />
         {categoryPath === "/" ? (
           <>
             <Heading textStyle={"4xl"}>{root.name}</Heading>
