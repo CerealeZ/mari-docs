@@ -53,6 +53,8 @@ export const Start = ({
               const brunocollection = JSON.parse(json) as BrunoCollection;
               onLoad(parseBruno(brunocollection));
             } catch (error) {
+              console.log(error);
+
               setError(
                 new Error("Error loading the bruno collection", {
                   cause: error,
@@ -110,7 +112,7 @@ interface BrunoFolder {
   type: "folder";
   name: string;
   root?: BrunoRoot;
-  items: (BrunoFolder | BrunoRequest)[];
+  items?: (BrunoFolder | BrunoRequest)[];
 }
 
 interface Param {
@@ -227,6 +229,8 @@ export const parseBruno = (collection: BrunoCollection) => {
     const childrenPath =
       root === "/" ? root + folder.name : root + "/" + folder.name;
 
+    if (!items) return;
+
     items.forEach((item) => {
       switch (item.type) {
         case "http":
@@ -239,7 +243,7 @@ export const parseBruno = (collection: BrunoCollection) => {
     });
   };
 
-  collection.items.map((item) => {
+  collection.items.forEach((item) => {
     switch (item.type) {
       case "http":
         requests.push({ path: "/", value: item });
