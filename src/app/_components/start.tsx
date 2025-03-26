@@ -183,11 +183,22 @@ type BearerAuth = {
 export type BrunoCollection = {
   name: string;
   version: string;
-  environments: unknown[];
+  environments: Environment[];
   items: (BrunoFolder | BrunoRequest)[];
   brunoConfig: unknown;
   root?: BrunoRoot;
   activeEnvironmentUid?: string;
+};
+
+export type Environment = {
+  name: string;
+  variables: {
+    name: string;
+    value: string;
+    enabled: boolean;
+    secret: boolean;
+    type: string;
+  }[];
 };
 
 type BrunoRoot = {
@@ -200,6 +211,7 @@ export const parseBruno = (collection: BrunoCollection) => {
     name: collection.name,
     version: collection.version,
     root: collection.root,
+    environments: collection.environments,
   };
 
   const requests: { path: string; value: BrunoRequest }[] = [];

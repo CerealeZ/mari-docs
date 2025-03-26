@@ -2,12 +2,15 @@
 
 import {
   Box,
+  Button,
   Clipboard,
   Code,
   DataList,
   EmptyState,
   For,
   IconButton,
+  Menu,
+  Portal,
   Show,
   Table,
   VStack,
@@ -26,12 +29,14 @@ import remarkGfm from "remark-gfm";
 import { List } from "@chakra-ui/react";
 import { useState } from "react";
 import { ImInfo } from "react-icons/im";
-import { parseBruno, Start } from "@/app/_components/start";
+import { Environment, parseBruno, Start } from "@/app/_components/start";
 
 export default function Home() {
   const [bruno, setBruno] = useState<ReturnType<typeof parseBruno> | null>(
     null
   );
+  const [enviromentSelected, setEnviromentSelected] = useState<string | null>();
+
   const [categoryPath, setCategoryPath] = useState("/");
   const splitedPath = categoryPath.split("/");
 
@@ -49,11 +54,52 @@ export default function Home() {
     ({ value }) => value.name === splitedPath.at(-1)
   );
 
+  const enviroments = (
+    root.environments.find(
+      (enviroment) => enviroment.name === enviromentSelected
+    )?.variables ?? []
+  ).filter((enviroment) => enviroment.enabled && enviroment.secret === false);
+
+  const parseEnviroment = replaceEnvironmentVariables(enviroments);
+
   return (
     <Grid gridTemplateColumns={"24rem 1fr"}>
       <GridItem colSpan={2}>
         <Heading textStyle={"5xl"}>Mari Docs</Heading>
         <Text>Documentación de bruno</Text>
+        <Show when={root.environments.length > 0}>
+          <Menu.Root>
+            <Menu.Trigger asChild>
+              <Button variant="outline" size="sm">
+                Enviroment
+              </Button>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content minW="10rem">
+                  <Menu.RadioItemGroup
+                    value={enviromentSelected ?? undefined}
+                    onValueChange={({ value }) => {
+                      setEnviromentSelected(value);
+                    }}
+                  >
+                    <Menu.RadioItem value={""}>No enviroment</Menu.RadioItem>
+
+                    {root.environments.map((enviroment) => (
+                      <Menu.RadioItem
+                        key={enviroment.name}
+                        value={enviroment.name}
+                      >
+                        {enviroment.name}
+                        <Menu.ItemIndicator />
+                      </Menu.RadioItem>
+                    ))}
+                  </Menu.RadioItemGroup>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
+        </Show>
       </GridItem>
 
       <GridItem>
@@ -133,7 +179,8 @@ export default function Home() {
               });
 
               return {
-                path: request.url,
+                id: request.url + request.method,
+                path: parseEnviroment(request.url),
                 method: request.method,
                 description: name,
                 docs: request.docs,
@@ -142,8 +189,8 @@ export default function Home() {
                   queries.length > 0
                     ? queries.map(({ name, value }) => {
                         return {
-                          key: name,
-                          value: value,
+                          key: parseEnviroment(name),
+                          value: parseEnviroment(value),
                         };
                       })
                     : undefined,
@@ -152,8 +199,8 @@ export default function Home() {
                   params.length > 0
                     ? params.map(({ name, value }) => {
                         return {
-                          key: name,
-                          value: value,
+                          key: parseEnviroment(name),
+                          value: parseEnviroment(value),
                         };
                       })
                     : undefined,
@@ -170,6 +217,7 @@ const Categories = ({
   data,
 }: {
   data: {
+    id: string;
     method: string;
     path: string;
     description: string;
@@ -202,9 +250,9 @@ const Categories = ({
           </EmptyState.Root>
         }
       >
-        {({ description, method, path, docs, body, query, params }) => {
+        {({ description, method, path, docs, body, query, params, id }) => {
           return (
-            <AccordionItem key={path + method} value={path + method}>
+            <AccordionItem key={id} value={id}>
               <AccordionItemTrigger>
                 <Badge size={"lg"}>{method}</Badge>
                 <Span textStyle={"2xl"}>{description}</Span>
@@ -449,3 +497,15 @@ const mapValues = <T extends { path: string }>(collection: T[]) => {
   }, new Map<string, Omit<T, "path">[]>());
   return map;
 };
+
+const replaceEnvironmentVariables =
+  (env: Environment["variables"]) => (str: string) => {
+    const values = Object.fromEntries(
+      env.map(({ name, value }) => [name, value])
+    );
+
+    // Reemplazamos usando una expresión regular
+    return str.replace(/{{(.*?)}}/g, (_, key) =>
+      key.trim() in values ? values[key.trim()] : `{{${key.trim()}}}`
+    );
+  };
