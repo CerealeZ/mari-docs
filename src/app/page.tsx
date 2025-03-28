@@ -8,6 +8,7 @@ import {
   DataList,
   EmptyState,
   For,
+  Group,
   IconButton,
   Menu,
   Portal,
@@ -15,7 +16,7 @@ import {
   Table,
   VStack,
 } from "@chakra-ui/react";
-import { Badge, Grid, GridItem, Heading, Span, Text } from "@chakra-ui/react";
+import { Badge, Grid, GridItem, Heading, Span, } from "@chakra-ui/react";
 import {
   AccordionItem,
   AccordionItemContent,
@@ -31,6 +32,7 @@ import { useState } from "react";
 import { ImInfo } from "react-icons/im";
 import { Environment, parseBruno, Start } from "@/app/_components/start";
 import { Categories as Breadcrumbs } from "@/app/_components/categories";
+import { FaAngleLeft, FaFolder } from "react-icons/fa";
 
 export default function Home() {
   const [bruno, setBruno] = useState<ReturnType<typeof parseBruno> | null>(
@@ -64,160 +66,231 @@ export default function Home() {
   const parseEnviroment = replaceEnvironmentVariables(enviroments);
 
   return (
-    <Grid gridTemplateColumns={"24rem 1fr"}>
-      <GridItem colSpan={2}>
-        <Heading textStyle={"5xl"}>Mari Docs</Heading>
-        <Text>Documentación de bruno</Text>
-        <Show when={root.environments.length > 0}>
-          <Menu.Root>
-            <Menu.Trigger asChild>
-              <Button variant="outline" size="sm">
-                Enviroment
-              </Button>
-            </Menu.Trigger>
-            <Portal>
-              <Menu.Positioner>
-                <Menu.Content minW="10rem">
-                  <Menu.RadioItemGroup
-                    value={enviromentSelected ?? undefined}
-                    onValueChange={({ value }) => {
-                      setEnviromentSelected(value);
-                    }}
-                  >
-                    <Menu.RadioItem value={""}>No enviroment</Menu.RadioItem>
+    <Grid
+      gridTemplateColumns={"1rem 1fr 1fr minmax(auto, 57rem) 1fr 1fr 1rem;"}
+      minH={"dvh"}
+      gridTemplateRows={"auto 1fr"}
+    >
+      <Grid
+        bgColor="colorPalette.fg"
+        gridTemplateColumns={"subgrid"}
+        gridColumn={"1 / -1"}
+      >
+        <Box gridColumn={"3 / 6"}>
+          <Heading textStyle={"5xl"} color={"colorPalette.contrast"}>
+            Mari Docs
+          </Heading>
+        </Box>
+      </Grid>
 
-                    {root.environments.map((enviroment) => (
-                      <Menu.RadioItem
-                        key={enviroment.name}
-                        value={enviroment.name}
+      <Grid gridTemplateColumns={"subgrid"} gridColumn={"1 / -1"}>
+        <Box gridColumn={"3 / 6"}>
+          <Grid gridTemplateColumns={"minmax(auto, 20rem) 1fr"} height={"full"}>
+            <GridItem borderRight={"1px solid {colors.gray.100}"} p={2}>
+              <Box borderBottom={"1px solid {colors.gray.100}"} mb={2}>
+                <Group minHeight={"10"}>
+                  {categoryPath === "/" ? (
+                    <Heading textStyle={"xl"}>{root.name}</Heading>
+                  ) : (
+                    <>
+                      <IconButton
+                        variant={"ghost"}
+                        onClick={() => {
+                          const newPath = categoryPath.split("/");
+                          newPath.pop();
+                          const path = newPath.join("/") || "/";
+                          setCategoryPath(path);
+                        }}
                       >
-                        {enviroment.name}
-                        <Menu.ItemIndicator />
-                      </Menu.RadioItem>
-                    ))}
-                  </Menu.RadioItemGroup>
-                </Menu.Content>
-              </Menu.Positioner>
-            </Portal>
-          </Menu.Root>
-        </Show>
-      </GridItem>
+                        <FaAngleLeft />
+                      </IconButton>
+                      <Heading textStyle={"xl"}>
+                        {selectedFolder?.value.name}
+                      </Heading>
+                    </>
+                  )}
+                </Group>
+              </Box>
 
-      <GridItem>
-        {categoryPath === "/" ? (
-          <Heading textStyle={"xl"}>{root.name}</Heading>
-        ) : (
-          <Heading textStyle={"xl"}> {selectedFolder?.value.name}</Heading>
-        )}
+              <Show
+                when={currentFolders.length > 0}
+                fallback={
+                  <EmptyState.Root>
+                    <EmptyState.Content>
+                      <EmptyState.Indicator>
+                        <FaFolder />
+                      </EmptyState.Indicator>
+                      <VStack textAlign="center">
+                        <EmptyState.Title>No folders</EmptyState.Title>
+                        <EmptyState.Description>
+                          There are no folders in this category
+                        </EmptyState.Description>
+                      </VStack>
+                    </EmptyState.Content>
+                  </EmptyState.Root>
+                }
+              >
+                <List.Root>
+                  <For each={currentFolders}>
+                    {({ value }, index) => {
+                      const newPath =
+                        categoryPath === "/"
+                          ? "/" + value.name
+                          : categoryPath + "/" + value.name;
 
-        <List.Root>
-          {currentFolders.map(({ value }, index) => {
-            const newPath =
-              categoryPath === "/"
-                ? "/" + value.name
-                : categoryPath + "/" + value.name;
+                      return (
+                        <List.Item
+                          cursor={"pointer"}
+                          _marker={{ content: "''" }}
+                          key={index}
+                        >
+                          <Button
+                            w={"full"}
+                            justifyContent={"start"}
+                            onClick={() => setCategoryPath(newPath)}
+                            variant={"ghost"}
+                          >
+                            {value.name}
+                          </Button>
+                        </List.Item>
+                      );
+                    }}
+                  </For>
+                </List.Root>
+              </Show>
+            </GridItem>
 
-            return (
-              <List.Item cursor={"pointer"} key={index}>
-                <Button
-                  w={"full"}
-                  justifyContent={"start"}
-                  onClick={() => setCategoryPath(newPath)}
-                  variant={"ghost"}
-                >
-                  {value.name}
-                </Button>
-              </List.Item>
-            );
-          })}
-        </List.Root>
-      </GridItem>
-      <GridItem px={4}>
-        <Breadcrumbs
-          path={splitedPath.filter(Boolean)}
-          onClick={(path) => {
-            setCategoryPath(path);
-          }}
-        />
-        {categoryPath === "/" ? (
-          <>
-            <Heading textStyle={"4xl"}>{root.name}</Heading>
-            <Prose>
-              <Markdown remarkPlugins={[remarkGfm]}>{root.root?.docs}</Markdown>
-            </Prose>
-          </>
-        ) : (
-          <>
-            <Heading textStyle={"4xl"}> {selectedFolder?.value.name}</Heading>
+            <GridItem p={2} position={"relative"}>
+              <Box position={"absolute"} top={2} right={2}>
+                <Show when={root.environments.length > 0}>
+                  <Menu.Root>
+                    <Menu.Trigger asChild>
+                      <Button size="sm">Enviroment</Button>
+                    </Menu.Trigger>
+                    <Portal>
+                      <Menu.Positioner>
+                        <Menu.Content minW="10rem">
+                          <Menu.RadioItemGroup
+                            value={enviromentSelected ?? undefined}
+                            onValueChange={({ value }) => {
+                              setEnviromentSelected(value);
+                            }}
+                          >
+                            <Menu.RadioItem value={""}>
+                              No enviroment
+                            </Menu.RadioItem>
 
-            <Show when={selectedFolder?.value.root?.docs}>
-              {(docs) => {
-                return (
+                            {root.environments.map((enviroment) => (
+                              <Menu.RadioItem
+                                key={enviroment.name}
+                                value={enviroment.name}
+                              >
+                                {enviroment.name}
+                                <Menu.ItemIndicator />
+                              </Menu.RadioItem>
+                            ))}
+                          </Menu.RadioItemGroup>
+                        </Menu.Content>
+                      </Menu.Positioner>
+                    </Portal>
+                  </Menu.Root>
+                </Show>
+              </Box>
+              <Breadcrumbs
+                path={splitedPath.filter(Boolean)}
+                onClick={(path) => {
+                  setCategoryPath(path);
+                }}
+              />
+              {categoryPath === "/" ? (
+                <>
+                  <Heading textStyle={"4xl"}>{root.name}</Heading>
                   <Prose>
-                    <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>{" "}
+                    <Markdown remarkPlugins={[remarkGfm]}>
+                      {root.root?.docs}
+                    </Markdown>
                   </Prose>
-                );
-              }}
-            </Show>
-          </>
-        )}
+                </>
+              ) : (
+                <>
+                  <Heading textStyle={"4xl"}>
+                    {" "}
+                    {selectedFolder?.value.name}
+                  </Heading>
 
-        <Categories
-          data={
-            mappedRequests.get(categoryPath)?.map(({ value }) => {
-              const { request, name } = value;
+                  <Show when={selectedFolder?.value.root?.docs}>
+                    {(docs) => {
+                      return (
+                        <Prose>
+                          <Markdown remarkPlugins={[remarkGfm]}>
+                            {docs}
+                          </Markdown>{" "}
+                        </Prose>
+                      );
+                    }}
+                  </Show>
+                </>
+              )}
 
-              const body =
-                request.body.mode === "json"
-                  ? {
-                      type: "json",
-                      content: JSON.stringify(
-                        JSON.parse(request.body.json),
-                        null,
-                        2
-                      ),
-                    }
-                  : undefined;
+              <Categories
+                data={
+                  mappedRequests.get(categoryPath)?.map(({ value }) => {
+                    const { request, name } = value;
 
-              const queries = request.params.filter(
-                ({ type }) => type === "query"
-              );
+                    const body =
+                      request.body.mode === "json"
+                        ? {
+                            type: "json",
+                            content: JSON.stringify(
+                              JSON.parse(request.body.json),
+                              null,
+                              2
+                            ),
+                          }
+                        : undefined;
 
-              const params = request.params.filter(({ type }) => {
-                return type === "path";
-              });
+                    const queries = request.params.filter(
+                      ({ type }) => type === "query"
+                    );
 
-              return {
-                id: request.url + request.method,
-                path: parseEnviroment(request.url),
-                method: request.method,
-                description: name,
-                docs: request.docs,
-                body: body,
-                query:
-                  queries.length > 0
-                    ? queries.map(({ name, value }) => {
-                        return {
-                          key: parseEnviroment(name),
-                          value: parseEnviroment(value),
-                        };
-                      })
-                    : undefined,
+                    const params = request.params.filter(({ type }) => {
+                      return type === "path";
+                    });
 
-                params:
-                  params.length > 0
-                    ? params.map(({ name, value }) => {
-                        return {
-                          key: parseEnviroment(name),
-                          value: parseEnviroment(value),
-                        };
-                      })
-                    : undefined,
-              };
-            }) ?? []
-          }
-        />
-      </GridItem>
+                    return {
+                      id: request.url + request.method,
+                      path: parseEnviroment(request.url),
+                      method: request.method,
+                      description: name,
+                      docs: request.docs,
+                      body: body,
+                      query:
+                        queries.length > 0
+                          ? queries.map(({ name, value }) => {
+                              return {
+                                key: parseEnviroment(name),
+                                value: parseEnviroment(value),
+                              };
+                            })
+                          : undefined,
+
+                      params:
+                        params.length > 0
+                          ? params.map(({ name, value }) => {
+                              return {
+                                key: parseEnviroment(name),
+                                value: parseEnviroment(value),
+                              };
+                            })
+                          : undefined,
+                    };
+                  }) ?? []
+                }
+              />
+            </GridItem>
+          </Grid>
+        </Box>
+      </Grid>
     </Grid>
   );
 }
