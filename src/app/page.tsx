@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AccordionRootProvider,
   Box,
   Button,
   Clipboard,
@@ -14,33 +15,43 @@ import {
   Portal,
   Show,
   Table,
+  Text,
+  useAccordion,
   VStack,
 } from "@chakra-ui/react";
-import { Badge, Grid, GridItem, Heading, Span, } from "@chakra-ui/react";
+import { Badge, Grid, GridItem, Heading, Span } from "@chakra-ui/react";
 import {
   AccordionItem,
   AccordionItemContent,
   AccordionItemTrigger,
-  AccordionRoot,
 } from "@/components/ui/accordion";
 import { Prose } from "@/components/ui/prose";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { List } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ImInfo } from "react-icons/im";
 import { Environment, parseBruno, Start } from "@/app/_components/start";
 import { Categories as Breadcrumbs } from "@/app/_components/categories";
 import { FaAngleLeft, FaFolder } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
+import { Searcher } from "@/app/_components/searcher";
+import type { Ref } from "react";
 
 export default function Home() {
   const [bruno, setBruno] = useState<ReturnType<typeof parseBruno> | null>(
     null
   );
-  const [enviromentSelected, setEnviromentSelected] = useState<string | null>();
+
+  const accordionRef = useRef<{
+    setValue: (value: string[], id: string) => void;
+  }>(null);
+
+  const [enviromentSelected, setEnviromentSelected] = useState<string>("");
 
   const [categoryPath, setCategoryPath] = useState("/");
+
   const splitedPath = categoryPath.split("/");
 
   if (!bruno) return <Start onLoad={setBruno} />;
@@ -110,6 +121,13 @@ export default function Home() {
                     </>
                   )}
                 </Group>
+                <Searcher
+                  requests={requests}
+                  onClick={(path, id) => {
+                    setCategoryPath(path);
+                    accordionRef.current?.setValue([id], id);
+                  }}
+                />
               </Box>
 
               <Show
@@ -161,47 +179,57 @@ export default function Home() {
             </GridItem>
 
             <GridItem p={2} position={"relative"}>
-              <Box position={"absolute"} top={2} right={2}>
-                <Show when={root.environments.length > 0}>
-                  <Menu.Root>
-                    <Menu.Trigger asChild>
-                      <Button size="sm">Enviroment</Button>
-                    </Menu.Trigger>
-                    <Portal>
-                      <Menu.Positioner>
-                        <Menu.Content minW="10rem">
-                          <Menu.RadioItemGroup
-                            value={enviromentSelected ?? undefined}
-                            onValueChange={({ value }) => {
-                              setEnviromentSelected(value);
-                            }}
-                          >
-                            <Menu.RadioItem value={""}>
-                              No enviroment
-                            </Menu.RadioItem>
-
-                            {root.environments.map((enviroment) => (
-                              <Menu.RadioItem
-                                key={enviroment.name}
-                                value={enviroment.name}
-                              >
-                                {enviroment.name}
-                                <Menu.ItemIndicator />
-                              </Menu.RadioItem>
-                            ))}
-                          </Menu.RadioItemGroup>
-                        </Menu.Content>
-                      </Menu.Positioner>
-                    </Portal>
-                  </Menu.Root>
-                </Show>
-              </Box>
               <Breadcrumbs
                 path={splitedPath.filter(Boolean)}
                 onClick={(path) => {
                   setCategoryPath(path);
                 }}
               />
+              <Box position={"absolute"} top={2} right={2}>
+                <Show when={root.environments.length > 0}>
+                  <Group>
+                    <Text textStyle="sm">
+                      Enviroment selected:{" "}
+                      <Span fontWeight={"bold"}>
+                        {enviromentSelected || "none"}
+                      </Span>
+                    </Text>
+                    <Menu.Root>
+                      <Menu.Trigger asChild>
+                        <Button size="sm" variant={"subtle"}>
+                          <FaGear /> Enviroment
+                        </Button>
+                      </Menu.Trigger>
+                      <Portal>
+                        <Menu.Positioner>
+                          <Menu.Content minW="10rem">
+                            <Menu.RadioItemGroup
+                              value={enviromentSelected}
+                              onValueChange={({ value }) => {
+                                setEnviromentSelected(value);
+                              }}
+                            >
+                              <Menu.RadioItem value={""}>
+                                No enviroment <Menu.ItemIndicator />
+                              </Menu.RadioItem>
+
+                              {root.environments.map((enviroment) => (
+                                <Menu.RadioItem
+                                  key={enviroment.name}
+                                  value={enviroment.name}
+                                >
+                                  {enviroment.name}
+                                  <Menu.ItemIndicator />
+                                </Menu.RadioItem>
+                              ))}
+                            </Menu.RadioItemGroup>
+                          </Menu.Content>
+                        </Menu.Positioner>
+                      </Portal>
+                    </Menu.Root>
+                  </Group>
+                </Show>
+              </Box>
               {categoryPath === "/" ? (
                 <>
                   <Heading textStyle={"4xl"}>{root.name}</Heading>
@@ -214,7 +242,6 @@ export default function Home() {
               ) : (
                 <>
                   <Heading textStyle={"4xl"}>
-                    {" "}
                     {selectedFolder?.value.name}
                   </Heading>
 
@@ -233,6 +260,7 @@ export default function Home() {
               )}
 
               <Categories
+                ref={accordionRef}
                 data={
                   mappedRequests.get(categoryPath)?.map(({ value }) => {
                     const { request, name } = value;
@@ -297,6 +325,7 @@ export default function Home() {
 
 const Categories = ({
   data,
+  ref,
 }: {
   data: {
     id: string;
@@ -311,9 +340,43 @@ const Categories = ({
     query?: { key: string; value: string }[];
     params?: { key: string; value: string }[];
   }[];
+
+  ref?: Ref<{ setValue: (value: string[], id: string) => void }>;
 }) => {
+  const myRef = useRef<string>(null);
+
+  const accordion = useAccordion({
+    collapsible: true,
+  });
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setValue: (value, id) => {
+        myRef.current = id;
+        accordion.setValue(value);
+      },
+    }),
+    [accordion]
+  );
+
+  useEffect(() => {
+    if (myRef.current) {
+      const myAccordion = document.querySelector(
+        `[data-identifier="${myRef.current}"]`
+      );
+
+      myAccordion?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      myRef.current = null;
+    }
+  });
+
   return (
-    <AccordionRoot>
+    <AccordionRootProvider value={accordion}>
       <For
         each={data}
         fallback={
@@ -334,7 +397,7 @@ const Categories = ({
       >
         {({ description, method, path, docs, body, query, params, id }) => {
           return (
-            <AccordionItem key={id} value={id}>
+            <AccordionItem key={id} value={id} data-identifier={id}>
               <AccordionItemTrigger>
                 <Badge size={"lg"}>{method}</Badge>
                 <Span textStyle={"2xl"}>{description}</Span>
@@ -440,7 +503,7 @@ const Categories = ({
           );
         }}
       </For>
-    </AccordionRoot>
+    </AccordionRootProvider>
   );
 };
 

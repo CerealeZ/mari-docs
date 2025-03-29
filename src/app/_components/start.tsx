@@ -7,6 +7,8 @@ import {
   Show,
   Alert,
   Stack,
+  Button,
+  VStack,
 } from "@chakra-ui/react";
 import Image from "next/image";
 import { useState } from "react";
@@ -17,6 +19,16 @@ export const Start = ({
   onLoad: (collection: ReturnType<typeof parseBruno>) => void;
 }) => {
   const [error, setError] = useState<null | Error>(null);
+
+  const fetchExample = async () => {
+    try {
+      const response = await fetch("/bruno-example.json");
+      const brunocollection = (await response.json()) as BrunoCollection;
+      onLoad(parseBruno(brunocollection));
+    } catch (error) {
+      setError(error as Error);
+    }
+  };
 
   return (
     <Center h={"dvh"} px={"2"}>
@@ -72,12 +84,17 @@ export const Start = ({
             </FileUpload.DropzoneContent>
           </FileUpload.Dropzone>
         </FileUpload.Root>
+
+        <VStack>
+          <Text>Not a Bruno enjoyer yet?</Text>
+          <Button onClick={fetchExample}>Use the JSON Placeholder</Button>
+        </VStack>
       </Stack>
     </Center>
   );
 };
 
-interface BrunoRequest {
+export interface BrunoRequest {
   type: "http";
   name: string;
   /** The request sequence. This is to sort the requests in the bruno interface */

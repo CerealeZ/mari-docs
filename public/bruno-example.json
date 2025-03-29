@@ -1,0 +1,740 @@
+{
+  "name": "JSONPlaceholder",
+  "version": "1",
+  "items": [
+    {
+      "type": "folder",
+      "name": "Albums",
+      "filename": "Albums",
+      "root": {
+        "meta": {
+          "name": "Albums"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get Albums",
+          "filename": "Get Albums.bru",
+          "seq": 1,
+          "request": {
+            "url": "{{ROOT}}/albums",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"quidem molestiae enim\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"sunt qui excepturi placeat culpa\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 3,\n    \"title\": \"omnis laborum odio\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get an album",
+          "filename": "Get an album.bru",
+          "seq": 2,
+          "request": {
+            "url": "{{ROOT}}/albums/:id",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"quidem molestiae enim\"\n}\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get albums photos",
+          "filename": "Get albums photos.bru",
+          "seq": 3,
+          "request": {
+            "url": "{{ROOT}}/albums/:id/photos",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "thumbnailUrl",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "albumId",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "url",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"albumId\": 1,\n    \"id\": 2,\n    \"title\": \"reprehenderit est deserunt velit ipsam\",\n    \"url\": \"https://via.placeholder.com/600/771796\",\n    \"thumbnailUrl\": \"https://via.placeholder.com/150/771796\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Posts",
+      "filename": "Posts",
+      "root": {
+        "meta": {
+          "name": "Posts"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get a post",
+          "filename": "Get a post.bru",
+          "seq": 1,
+          "request": {
+            "url": "{{ROOT}}/posts/:id",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n```\n{\n  id: 1,\n  title: '...',\n  body: '...',\n  userId: 1\n}\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get comments from a post",
+          "filename": "Get comments from a post.bru",
+          "seq": 3,
+          "request": {
+            "url": "{{ROOT}}/posts/:id/comments",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "postId",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "body",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"postId\": 1,\n    \"id\": 1,\n    \"name\": \"id labore ex et quam laborum\",\n    \"email\": \"Eliseo@gardner.biz\",\n    \"body\": \"laudantium enim quasi est quidem magnam voluptate ipsam eos\\ntempora quo necessitatibus\\ndolor quam autem quasi\\nreiciendis et nam sapiente accusantium\"\n  },\n  {\n    \"postId\": 1,\n    \"id\": 2,\n    \"name\": \"quo vero reiciendis velit similique earum\",\n    \"email\": \"Jayne_Kuhic@sydney.com\",\n    \"body\": \"est natus enim nihil est dolore omnis voluptatem numquam\\net omnis occaecati quod ullam at\\nvoluptatem error expedita pariatur\\nnihil sint nostrum voluptatem reiciendis et\"\n  },\n  {\n    \"postId\": 1,\n    \"id\": 3,\n    \"name\": \"odio adipisci rerum aut animi\",\n    \"email\": \"Nikita@garfield.biz\",\n    \"body\": \"quia molestiae reprehenderit quasi aspernatur\\naut expedita occaecati aliquam eveniet laudantium\\nomnis quibusdam delectus saepe quia accusamus maiores nam est\\ncum et ducimus et vero voluptates excepturi deleniti ratione\"\n  },\n  {\n    \"postId\": 1,\n    \"id\": 4,\n    \"name\": \"alias odio sit\",\n    \"email\": \"Lew@alysha.tv\",\n    \"body\": \"non et atque\\noccaecati deserunt quas accusantium unde odit nobis qui voluptatem\\nquia voluptas consequuntur itaque dolor\\net qui rerum deleniti ut occaecati\"\n  },\n  {\n    \"postId\": 1,\n    \"id\": 5,\n    \"name\": \"vero eaque aliquid doloribus et culpa\",\n    \"email\": \"Hayden@althea.biz\",\n    \"body\": \"harum non quasi et ratione\\ntempore iure ex voluptates in ratione\\nharum architecto fugit inventore cupiditate\\nvoluptates magni quo et\"\n  }\n]\n\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get all posts",
+          "filename": "Get all posts.bru",
+          "seq": 2,
+          "request": {
+            "url": "{{ROOT}}/posts",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "body",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "userId",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n    \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"qui est esse\",\n    \"body\": \"est rerum tempore vitae\\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\\nqui aperiam non debitis possimus qui neque nisi nulla\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "Users",
+      "filename": "Users",
+      "root": {
+        "meta": {
+          "name": "Users"
+        }
+      },
+      "items": [
+        {
+          "type": "http",
+          "name": "Get users",
+          "filename": "Get users.bru",
+          "seq": 1,
+          "request": {
+            "url": "{{ROOT}}/users?id&name&username&email&phone&website",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "username",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "email",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "phone",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "website",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"id\": 1,\n    \"name\": \"Leanne Graham\",\n    \"username\": \"Bret\",\n    \"email\": \"Sincere@april.biz\",\n    \"address\": {\n      \"street\": \"Kulas Light\",\n      \"suite\": \"Apt. 556\",\n      \"city\": \"Gwenborough\",\n      \"zipcode\": \"92998-3874\",\n      \"geo\": {\n        \"lat\": \"-37.3159\",\n        \"lng\": \"81.1496\"\n      }\n    },\n    \"phone\": \"1-770-736-8031 x56442\",\n    \"website\": \"hildegard.org\",\n    \"company\": {\n      \"name\": \"Romaguera-Crona\",\n      \"catchPhrase\": \"Multi-layered client-server neural-net\",\n      \"bs\": \"harness real-time e-markets\"\n    }\n  }  \n]",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user",
+          "filename": "Get user.bru",
+          "seq": 2,
+          "request": {
+            "url": "{{ROOT}}/users/:id",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n{\n  \"id\": 1,\n  \"name\": \"Leanne Graham\",\n  \"username\": \"Bret\",\n  \"email\": \"Sincere@april.biz\",\n  \"address\": {\n    \"street\": \"Kulas Light\",\n    \"suite\": \"Apt. 556\",\n    \"city\": \"Gwenborough\",\n    \"zipcode\": \"92998-3874\",\n    \"geo\": {\n      \"lat\": \"-37.3159\",\n      \"lng\": \"81.1496\"\n    }\n  },\n  \"phone\": \"1-770-736-8031 x56442\",\n  \"website\": \"hildegard.org\",\n  \"company\": {\n    \"name\": \"Romaguera-Crona\",\n    \"catchPhrase\": \"Multi-layered client-server neural-net\",\n    \"bs\": \"harness real-time e-markets\"\n  }\n}\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user comments",
+          "filename": "Get user comments.bru",
+          "seq": 3,
+          "request": {
+            "url": "{{ROOT}}/users/:id/comments",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "postId",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "body",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "email",
+                "value": "",
+                "type": "query",
+                "enabled": false
+              },
+              {
+                "name": "id",
+                "value": "2",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"postId\": 1,\n    \"id\": 1,\n    \"name\": \"id labore ex et quam laborum\",\n    \"email\": \"Eliseo@gardner.biz\",\n    \"body\": \"laudantium enim quasi est quidem magnam voluptate ipsam eos\\ntempora quo necessitatibus\\ndolor quam autem quasi\\nreiciendis et nam sapiente accusantium\"\n  },\n  {\n    \"postId\": 1,\n    \"id\": 2,\n    \"name\": \"quo vero reiciendis velit similique earum\",\n    \"email\": \"Jayne_Kuhic@sydney.com\",\n    \"body\": \"est natus enim nihil est dolore omnis voluptatem numquam\\net omnis occaecati quod ullam at\\nvoluptatem error expedita pariatur\\nnihil sint nostrum voluptatem reiciendis et\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user posts",
+          "filename": "Get user posts.bru",
+          "seq": 4,
+          "request": {
+            "url": "{{ROOT}}/users/:id/posts?userId&id&title&body",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "body",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n    \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"qui est esse\",\n    \"body\": \"est rerum tempore vitae\\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\\nqui aperiam non debitis possimus qui neque nisi nulla\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user TODOs",
+          "filename": "Get user TODOs.bru",
+          "seq": 5,
+          "request": {
+            "url": "{{ROOT}}/users/:id/todos?userId&id&title&completed",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "completed",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n```\n[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"delectus aut autem\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"quis ut nam facilis et officia qui\",\n    \"completed\": false\n  },\n  {\n    \"userId\": 1,\n    \"id\": 3,\n    \"title\": \"fugiat veniam minus\",\n    \"completed\": false\n  } \n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user photos",
+          "filename": "Get user photos.bru",
+          "seq": 6,
+          "request": {
+            "url": "{{ROOT}}/users/:id/photos?albumId&id&title&url&thumbnailUrl",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "albumId",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "url",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "thumbnailUrl",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n\n```\n[\n  {\n    \"albumId\": 1,\n    \"id\": 1,\n    \"title\": \"accusamus beatae ad facilis cum similique qui sunt\",\n    \"url\": \"https://via.placeholder.com/600/92c952\",\n    \"thumbnailUrl\": \"https://via.placeholder.com/150/92c952\"\n  },\n  {\n    \"albumId\": 1,\n    \"id\": 2,\n    \"title\": \"reprehenderit est deserunt velit ipsam\",\n    \"url\": \"https://via.placeholder.com/600/771796\",\n    \"thumbnailUrl\": \"https://via.placeholder.com/150/771796\"\n  },\n  {\n    \"albumId\": 1,\n    \"id\": 3,\n    \"title\": \"officia porro iure quia iusto qui ipsa ut modi\",\n    \"url\": \"https://via.placeholder.com/600/24f355\",\n    \"thumbnailUrl\": \"https://via.placeholder.com/150/24f355\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        },
+        {
+          "type": "http",
+          "name": "Get user albums",
+          "filename": "Get user albums.bru",
+          "seq": 7,
+          "request": {
+            "url": "{{ROOT}}/users/:id/albums?userId&id&title",
+            "method": "GET",
+            "headers": [],
+            "params": [
+              {
+                "name": "userId",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "title",
+                "value": "",
+                "type": "query",
+                "enabled": true
+              },
+              {
+                "name": "id",
+                "value": "1",
+                "type": "path",
+                "enabled": true
+              }
+            ],
+            "body": {
+              "mode": "none",
+              "formUrlEncoded": [],
+              "multipartForm": [],
+              "file": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "docs": "## Output\n```\n[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"quidem molestiae enim\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"sunt qui excepturi placeat culpa\"\n  }\n]\n```",
+            "auth": {
+              "mode": "inherit"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "activeEnvironmentUid": "OfRrIRAmniOx8hSnhsdSE",
+  "environments": [
+    {
+      "variables": [
+        {
+          "name": "ROOT",
+          "value": "https://jsonplaceholder.typicode.com",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        }
+      ],
+      "name": "Default"
+    }
+  ],
+  "root": {
+    "docs": "# JSON Placeholder\n\nFree fake and reliable API for testing and prototyping.\nPowered by  [JSON Server](https://github.com/typicode/json-server) + [LowDB](https://github.com/typicode/lowdb).\n\n## Sponsors\n\nJSONPlaceholder is supported by the following companies and [Sponsors](https://github.com/sponsors/typicode) on GitHub, check them out 💖\n\n## When to use\nJSONPlaceholder is a free online REST API that you can use whenever you need some fake data. It can be in a README on GitHub, for a demo on CodeSandbox, in code examples on Stack Overflow, ...or simply to test things locally."
+  },
+  "brunoConfig": {
+    "version": "1",
+    "name": "JSONPlaceholder",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ],
+    "size": 0.00305938720703125,
+    "filesCount": 7
+  }
+}
