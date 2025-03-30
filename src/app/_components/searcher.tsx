@@ -13,7 +13,7 @@ import {
   EmptyState,
   VStack,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useOnClickOutside } from "usehooks-ts";
 
@@ -35,14 +35,20 @@ export const Searcher = ({
     setOpen(false);
   });
 
-  const filteredRequests = requests
-    .filter((request) => {
-      return (
-        request.value.name.toLowerCase().includes(search.toLowerCase()) ||
-        request.value.request.url.toLowerCase().includes(search.toLowerCase())
-      );
-    })
-    .slice(0, 5);
+  const filteredRequests = useMemo(() => {
+    const result = [];
+    const searchLower = search.toLowerCase();
+    for (const request of requests) {
+      if (
+        request.value.name.toLowerCase().includes(searchLower) ||
+        request.value.request.url.toLowerCase().includes(searchLower)
+      ) {
+        result.push(request);
+        if (result.length >= 5) break;
+      }
+    }
+    return result;
+  }, [requests, search]);
 
   return (
     <Popover.Root
