@@ -9,8 +9,11 @@ import {
   Stack,
   Button,
   VStack,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import Image from "next/image";
+import Link from "next/link";
+
 import { useState } from "react";
 
 export const Start = ({
@@ -35,6 +38,10 @@ export const Start = ({
       <Stack maxW={"65ch"} w={"full"}>
         <Heading textStyle={"6xl"}>Mari Docs</Heading>
         <Text>Watch your Bruno collection in a nice way</Text>
+        <ChakraLink fontWeight={"bold"} asChild alignSelf={"start"}>
+          <Link href={"/about"}>What is this?</Link>
+        </ChakraLink>
+
         <Box minH={"20"}>
           <Show when={error}>
             {() => {
