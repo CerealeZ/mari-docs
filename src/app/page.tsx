@@ -272,11 +272,10 @@ const useBrunoInfo = ({
     const splitedPath = categoryPath.split("/");
     const mappedRequests = mapValues(requests);
     const mappedFolders = mapValues(folders);
-    const path = splitedPath.slice(0, -1).join("/") || "/";
-    const categoryFolders = mappedFolders.get(path) ?? [];
-    const selectedFolder = categoryFolders?.find(
-      ({ value }) => value.name === splitedPath.at(-1)
-    );
+    const categoryFolders = mappedFolders.get(categoryPath) ?? [];
+    const prevPath =
+      splitedPath.slice(0, splitedPath.length - 1).join("/") || "/";
+    const selectedFolder = folders.find((folder) => folder.path === prevPath);
     const enviroments = (
       root.environments.find(
         (enviroment) => enviroment.name === enviromentSelected
