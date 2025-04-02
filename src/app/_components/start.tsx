@@ -1,3 +1,4 @@
+import { Field } from "@/components/ui/field";
 import {
   Center,
   Heading,
@@ -10,11 +11,13 @@ import {
   Button,
   VStack,
   Link as ChakraLink,
+  Input,
+  Group,
 } from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const Start = ({
   onLoad,
@@ -22,6 +25,9 @@ export const Start = ({
   onLoad: (collection: ReturnType<typeof parseBruno>) => void;
 }) => {
   const [error, setError] = useState<null | Error>(null);
+  const url = useRef<string>("");
+
+  const [loading, setLoading] = useState(false);
 
   const fetchExample = async () => {
     try {
@@ -91,6 +97,47 @@ export const Start = ({
             </FileUpload.DropzoneContent>
           </FileUpload.Dropzone>
         </FileUpload.Root>
+
+        <Group
+          attached
+          w="full"
+          alignItems={"end"}
+          position={"relative"}
+          as="form"
+          onSubmit={async (e) => {
+            try {
+              setLoading(true);
+              e.preventDefault();
+              const response = await fetch(url.current);
+              const brunocollection =
+                (await response.json()) as BrunoCollection;
+              onLoad(parseBruno(brunocollection));
+            } catch (error) {
+              setError(error as Error);
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Field label={"Collection URL"} zIndex="2">
+            <Input
+              type="text"
+              rounded={"none"}
+              onChange={(e) => {
+                url.current = e.target.value;
+              }}
+              disabled={loading}
+            />
+          </Field>
+          <Button
+            bg="bg.subtle"
+            variant="outline"
+            loading={loading}
+            type="submit"
+          >
+            Submit
+          </Button>
+        </Group>
 
         <VStack>
           <Text>Not a Bruno enjoyer yet?</Text>
