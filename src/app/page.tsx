@@ -275,7 +275,10 @@ const useBrunoInfo = ({
     const categoryFolders = mappedFolders.get(categoryPath) ?? [];
     const prevPath =
       splitedPath.slice(0, splitedPath.length - 1).join("/") || "/";
-    const selectedFolder = folders.find((folder) => folder.path === prevPath);
+    const selectedFolder = folders.find(
+      (folder) =>
+        folder.path === prevPath && folder.value.name === splitedPath.at(-1)
+    );
     const enviroments = (
       root.environments.find(
         (enviroment) => enviroment.name === enviromentSelected
